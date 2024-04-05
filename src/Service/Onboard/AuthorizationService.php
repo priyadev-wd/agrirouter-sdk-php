@@ -38,11 +38,18 @@ namespace App\Service\Onboard {
          * @param string $applicationId The application ID for the authorization.
          * @return AuthorizationUrlResult The prepared authorization url and the application id
          */
-        public function authorizationUrl(string $applicationId): AuthorizationUrlResult
+        public function authorizationUrl(string $applicationId)
         {
             $state = UuidService::newUuid();
             $authorizationUrl = $this->environment->authorizationUrl($applicationId) . '?response_type=onboard&state=' . $state;
-            return new AuthorizationUrlResult($authorizationUrl, $state);
+
+            $authorizationUrlResult = new AuthorizationUrlResult();
+            $authorizationUrlResult->setAuthorizationUrl($authorizationUrl);
+            $authorizationUrlResult->setState($state);
+
+            return $authorizationUrlResult;
+
+            //return new AuthorizationUrlResult($authorizationUrl, $state);
         }
 
         /**
@@ -65,8 +72,9 @@ namespace App\Service\Onboard {
          * @return AuthorizationResult The parsed authorization parameters
          * @throws DecodeMessageException Will be thrown if the authorization result uri doesn't meet the specification.
          */
-        public function parseAuthorizationResult(string $authorizationResultUri): AuthorizationResult
+        public function parseAuthorizationResult(string $authorizationResultUri)
         {
+
             $parameters = explode('&', $authorizationResultUri);
             if (count($parameters) < 2 || count($parameters) > 4) {
                 throw new DecodeMessageException("The number authorization result parameters '{$authorizationResultUri}' does not meet the specification", ErrorCodes::AUTHORIZATION_RESULT_PARAMETER_COUNT_ERROR);
@@ -74,8 +82,9 @@ namespace App\Service\Onboard {
 
             $authorizationResult = new AuthorizationResult();
             foreach ($parameters as $parameterString) {
+
                 $parameter = explode("=", $parameterString);
-                if (count($parameter) < 2) // original was - if (count($parameter) != 2)
+                if (count($parameter) < 2)
                     throw new DecodeMessageException("Parameter without value in '$parameterString'.", ErrorCodes::AUTHORIZATION_PARAMETER_VALUE_MISSING);
                 switch ($parameter[0]) {
                     case self::STATE:
@@ -115,5 +124,6 @@ namespace App\Service\Onboard {
             }
             return $authorizationToken;
         }
+
     }
 }
