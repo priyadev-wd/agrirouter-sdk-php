@@ -75,7 +75,7 @@ namespace App\Service\Onboard {
             $authorizationResult = new AuthorizationResult();
             foreach ($parameters as $parameterString) {
                 $parameter = explode("=", $parameterString);
-                if (count($parameter) < 2)
+                if (count($parameter) < 2) // original was - if (count($parameter) != 2)
                     throw new DecodeMessageException("Parameter without value in '$parameterString'.", ErrorCodes::AUTHORIZATION_PARAMETER_VALUE_MISSING);
                 switch ($parameter[0]) {
                     case self::STATE:
